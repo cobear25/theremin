@@ -14,6 +14,11 @@
 		A30B9B8B1B965229007BBB27 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A30B9B8A1B965229007BBB27 /* Images.xcassets */; };
 		A30B9B8E1B965229007BBB27 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A30B9B8C1B965229007BBB27 /* LaunchScreen.xib */; };
 		A30B9B9A1B965229007BBB27 /* ThereminTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A30B9B991B965229007BBB27 /* ThereminTests.m */; };
+		A30B9BA51B96546E007BBB27 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A30B9BA31B96546E007BBB27 /* CoreAudio.framework */; };
+		A30B9BA61B96546E007BBB27 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A30B9BA41B96546E007BBB27 /* CoreMIDI.framework */; };
+		A30B9BA81B965475007BBB27 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A30B9BA71B965475007BBB27 /* AudioToolbox.framework */; };
+		A30B9BAB1B965928007BBB27 /* Gorts_Filters.SF2 in Resources */ = {isa = PBXBuildFile; fileRef = A30B9BA91B965928007BBB27 /* Gorts_Filters.SF2 */; };
+		A30B9BAC1B965928007BBB27 /* simpletest.mid in Resources */ = {isa = PBXBuildFile; fileRef = A30B9BAA1B965928007BBB27 /* simpletest.mid */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +45,11 @@
 		A30B9B931B965229007BBB27 /* ThereminTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ThereminTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A30B9B981B965229007BBB27 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A30B9B991B965229007BBB27 /* ThereminTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ThereminTests.m; sourceTree = "<group>"; };
+		A30B9BA31B96546E007BBB27 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		A30B9BA41B96546E007BBB27 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
+		A30B9BA71B965475007BBB27 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		A30B9BA91B965928007BBB27 /* Gorts_Filters.SF2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Gorts_Filters.SF2; sourceTree = "<group>"; };
+		A30B9BAA1B965928007BBB27 /* simpletest.mid */ = {isa = PBXFileReference; lastKnownFileType = audio.midi; path = simpletest.mid; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +57,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A30B9BA81B965475007BBB27 /* AudioToolbox.framework in Frameworks */,
+				A30B9BA51B96546E007BBB27 /* CoreAudio.framework in Frameworks */,
+				A30B9BA61B96546E007BBB27 /* CoreMIDI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +76,9 @@
 		A30B9B711B965228007BBB27 = {
 			isa = PBXGroup;
 			children = (
+				A30B9BA71B965475007BBB27 /* AudioToolbox.framework */,
+				A30B9BA31B96546E007BBB27 /* CoreAudio.framework */,
+				A30B9BA41B96546E007BBB27 /* CoreMIDI.framework */,
 				A30B9B7C1B965229007BBB27 /* Theremin */,
 				A30B9B961B965229007BBB27 /* ThereminTests */,
 				A30B9B7B1B965228007BBB27 /* Products */,
@@ -85,6 +101,8 @@
 				A30B9B821B965229007BBB27 /* AppDelegate.m */,
 				A30B9B841B965229007BBB27 /* ViewController.h */,
 				A30B9B851B965229007BBB27 /* ViewController.m */,
+				A30B9BA91B965928007BBB27 /* Gorts_Filters.SF2 */,
+				A30B9BAA1B965928007BBB27 /* simpletest.mid */,
 				A30B9B871B965229007BBB27 /* Main.storyboard */,
 				A30B9B8A1B965229007BBB27 /* Images.xcassets */,
 				A30B9B8C1B965229007BBB27 /* LaunchScreen.xib */,
@@ -200,6 +218,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A30B9B891B965229007BBB27 /* Main.storyboard in Resources */,
+				A30B9BAB1B965928007BBB27 /* Gorts_Filters.SF2 in Resources */,
+				A30B9BAC1B965928007BBB27 /* simpletest.mid in Resources */,
 				A30B9B8E1B965229007BBB27 /* LaunchScreen.xib in Resources */,
 				A30B9B8B1B965229007BBB27 /* Images.xcassets in Resources */,
 			);
