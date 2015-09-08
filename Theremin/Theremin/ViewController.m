@@ -18,11 +18,76 @@
 
 @end
 
+static MusicPlayer player;
+static MusicSequence sequence;
+
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    OSStatus result = noErr;
+
+
+    [self createAUGraph];
+    [self configureAndStartAudioProcessingGraph: self.processingGraph];
+
+    // Create a client
+    MIDIClientRef virtualMidi;
+    result = MIDIClientCreate(CFSTR("Virtual Client"),
+                              MyMIDINotifyProc,
+                              NULL,
+                              &virtualMidi);
+
+    NSAssert( result == noErr, @"MIDIClientCreate failed. Error code: %d '%.4s'", (int) result, (const char *)&result);
+
+    // Create an endpoint
+    MIDIEndpointRef virtualEndpoint;
+    result = MIDIDestinationCreate(virtualMidi, @"Virtual Destination", MyMIDIReadProc, self.samplerUnit, &virtualEndpoint);
+
+    NSAssert( result == noErr, @"MIDIDestinationCreate failed. Error code: %d '%.4s'", (int) result, (const char *)&result);
+
+
+
+    // Initialise the music sequence
+    NewMusicSequence(&sequence);
+
+    // Get a string to the path of the MIDI file which
+    // should be located in the Resources folder
+    NSString *midiFilePath = [[NSBundle mainBundle]
+                              pathForResource:@"simpletest"
+                              ofType:@"mid"];
+
+    // Create a new URL which points to the MIDI file
+    NSURL * midiFileURL = [NSURL fileURLWithPath:midiFilePath];
+
+
+    MusicSequenceFileLoad(sequence, (__bridge CFURLRef) midiFileURL, 0, 0);
+
+////     Create a new music player
+//    MusicPlayer  p;
+    // Initialise the music player
+    NewMusicPlayer(&player);
+
+    // ************* Set the endpoint of the sequence to be our virtual endpoint
+    MusicSequenceSetMIDIEndpoint(sequence, virtualEndpoint);
+
+    // Load the ound font from file
+    NSURL *presetURL = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:@"Gorts_Filters" ofType:@"SF2"]];
+
+    // Initialise the sound font
+    [self loadFromDLSOrSoundFont: (NSURL *)presetURL withPatch: (int)10];
+
+    // Load the sequence into the music player
+    MusicPlayerSetSequence(player, sequence);
+    // Called to do some MusicPlayer setup. This just
+    // reduces latency when MusicPlayerStart is called
+    MusicPlayerPreroll(player);
+
+    // Starts the music playing
+    MusicPlayerStart(player);
+
+
 }
 
 - (void)didReceiveMemoryWarning {
@@ -56,89 +121,42 @@
 
 - (void)playSound {
     NSLog(@"x:%f, y:%f", self.touchPoint.x, self.touchPoint.y);
-    OSStatus result = noErr;
-    
-    
-    [self createAUGraph];
-    [self configureAndStartAudioProcessingGraph: self.processingGraph];
-    
-    // Create a client
-    MIDIClientRef virtualMidi;
-    result = MIDIClientCreate(CFSTR("Virtual Client"),
-                              MyMIDINotifyProc,
-                              NULL,
-                              &virtualMidi);
-    
-    NSAssert( result == noErr, @"MIDIClientCreate failed. Error code: %d '%.4s'", (int) result, (const char *)&result);
-    
-    // Create an endpoint
-    MIDIEndpointRef virtualEndpoint;
-    result = MIDIDestinationCreate(virtualMidi, @"Virtual Destination", MyMIDIReadProc, self.samplerUnit, &virtualEndpoint);
-    
-    NSAssert( result == noErr, @"MIDIDestinationCreate failed. Error code: %d '%.4s'", (int) result, (const char *)&result);
-    
 
-    
-    // Create a new music sequence
-    MusicSequence s;
-    // Initialise the music sequence
-    NewMusicSequence(&s);
-    
-    // Get a string to the path of the MIDI file which
-    // should be located in the Resources folder
-    NSString *midiFilePath = [[NSBundle mainBundle]
-                               pathForResource:@"simpletest"
-                               ofType:@"mid"];
-    
-    // Create a new URL which points to the MIDI file
-    NSURL * midiFileURL = [NSURL fileURLWithPath:midiFilePath];
-                        
-    
-    MusicSequenceFileLoad(s, (__bridge CFURLRef) midiFileURL, 0, 0);
-    
-    // Create a new music player
-    MusicPlayer  p;
-    // Initialise the music player
-    NewMusicPlayer(&p);
-
-    // ************* Set the endpoint of the sequence to be our virtual endpoint
-    MusicSequenceSetMIDIEndpoint(s, virtualEndpoint);
-    
-    // Load the ound font from file
-    NSURL *presetURL = [[NSURL alloc] initFileURLWithPath:[[NSBundle mainBundle] pathForResource:@"Gorts_Filters" ofType:@"SF2"]];
-    
-    // Initialise the sound font
-    [self loadFromDLSOrSoundFont: (NSURL *)presetURL withPatch: (int)10];
-
-    // Load the sequence into the music player
-    MusicPlayerSetSequence(p, s);
-    // Called to do some MusicPlayer setup. This just 
-    // reduces latency when MusicPlayerStart is called
-    MusicPlayerPreroll(p);
-    // Starts the music playing
-    MusicPlayerStart(p);
-
-    // Get length of track so that we know how long to kill time for
     MusicTrack t;
-    MusicTimeStamp len;
-    UInt32 sz = sizeof(MusicTimeStamp);
-    MusicSequenceGetIndTrack(s, 1, &t);
-    MusicTrackGetProperty(t, kSequenceTrackProperty_TrackLength, &len, &sz);
-    
-    
-    while (1) { // kill time until the music is over
-        usleep (3 * 1000 * 1000);
-        MusicTimeStamp now = 0;
-        MusicPlayerGetTime (p, &now);
-        if (now >= len)
-            break;
-    }
-    
-    // Stop the player and dispose of the objects
-    MusicPlayerStop(p);
-    DisposeMusicSequence(s);
-    DisposeMusicPlayer(p);
-    
+    MusicSequenceGetIndTrack(sequence, 1, &t);
+    MusicTimeStamp time;
+    MusicPlayerGetTime(player, &time);
+    MIDINoteMessage note;
+    note.channel = 1;
+    note.note = 40;
+    note.velocity = 255;
+    note.releaseVelocity = 0;
+    note.duration = 1;
+//    MusicTrackNewMIDINoteEvent(t, time, &note);
+    MusicDeviceMIDIEvent (self.samplerUnit, -112, (UInt8)self.touchPoint.y, -32, 0);
+
+
+//    // Get length of track so that we know how long to kill time for
+//    MusicTrack t;
+//    MusicTimeStamp len;
+//    UInt32 sz = sizeof(MusicTimeStamp);
+//    MusicSequenceGetIndTrack(s, 1, &t);
+//    MusicTrackGetProperty(t, kSequenceTrackProperty_TrackLength, &len, &sz);
+//    
+//    
+//    while (1) { // kill time until the music is over
+//        usleep (3 * 1000 * 1000);
+//        MusicTimeStamp now = 0;
+//        MusicPlayerGetTime (p, &now);
+//        if (now >= len)
+//            break;
+//    }
+//    
+//    // Stop the player and dispose of the objects
+//    MusicPlayerStop(p);
+//    DisposeMusicSequence(s);
+//    DisposeMusicPlayer(p);
+
 
 }
 - (void)endSound {
@@ -235,7 +253,7 @@ static void MyMIDIReadProc(const MIDIPacketList *pktlist,
         
         if (midiCommand == 0x09) {
             Byte note = packet->data[1] & 0x7F;
-            Byte velocity = packet->data[2] & 0x7F; 
+            Byte velocity = packet->data[2] & 0x7F;
             
             int noteNumber = ((int) note) % 12;
             NSString *noteType;
