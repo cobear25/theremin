@@ -15,6 +15,7 @@
 @property (assign, nonatomic) AUGraph processingGraph;
 @property (assign, nonatomic) AudioUnit samplerUnit;
 @property (assign, nonatomic) AudioUnit ioUnit;
+@property (assign, nonatomic) UInt8 prevPitch;
 
 @end
 
@@ -120,8 +121,7 @@ static MusicSequence sequence;
 }
 
 - (void)playSound {
-    NSLog(@"x:%f, y:%f", self.touchPoint.x, self.touchPoint.y);
-
+    NSLog(@"x:%f, y:%f", self.touchPoint.x, fabsf(self.touchPoint.y - self.view.frame.size.height));
     MusicTrack t;
     MusicSequenceGetIndTrack(sequence, 1, &t);
     MusicTimeStamp time;
@@ -133,7 +133,14 @@ static MusicSequence sequence;
     note.releaseVelocity = 0;
     note.duration = 1;
 //    MusicTrackNewMIDINoteEvent(t, time, &note);
-    MusicDeviceMIDIEvent (self.samplerUnit, -112, (UInt8)self.touchPoint.y, -32, 0);
+    UInt8 pitch = (UInt8)(fabsf(self.touchPoint.y - self.view.frame.size.height)/self.view.frame.size.height * 36) + 48;
+    UInt8 volume = (UInt8)(self.touchPoint.x/self.view.frame.size.width * 127);
+    if (self.prevPitch != pitch) {
+        MusicDeviceMIDIEvent (self.samplerUnit, -112, self.prevPitch, 0, 0);
+        MusicDeviceMIDIEvent (self.samplerUnit, -112, pitch, volume, 0);
+        NSLog(@"note value: %i", pitch);
+    }
+    self.prevPitch = pitch;
 
 
 //    // Get length of track so that we know how long to kill time for
@@ -160,6 +167,8 @@ static MusicSequence sequence;
 
 }
 - (void)endSound {
+    MusicDeviceMIDIEvent (self.samplerUnit, -112, self.prevPitch, 0, 0);
+    self.prevPitch = 0;
 }
 
 - (BOOL)createAUGraph {
